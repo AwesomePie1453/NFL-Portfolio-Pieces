@@ -1,0 +1,65 @@
+---
+title: "2010 NFL QB MVP canidates by stats"
+author: "AwesomePie1453"
+date: "1/28/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This document looks at the 4 best quarterbacks according to MVP votes in the 2010 NFL season, and compares them across a variety of NFL stats. Who ended up winning the award, and do you think it is deserved?
+
+```{r load}
+library(tidyverse)
+library(readr)
+nfl_2010_2017 <- read_csv("nfl_2010-2017.csv")
+```
+
+```{r QBs}
+nfl_QBs <- nfl_2010_2017 %>%
+  filter(position == "QB") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Aaron Rodgers", "Tom Brady", "Philip Rivers", "Michael Vick"))
+  
+```
+
+
+
+```{r Passyds}
+nfl_QBs %>%
+  ggplot(mapping = aes(x = game_week, y= pass_yds, color = name)) + geom_smooth() 
+```
+By passing yards
+
+```{r psstds}
+nfl_QBs %>%
+  ggplot(mapping = aes(x = game_week, y= pass_tds, color = name)) + geom_smooth()
+```
+By touchdowns thrown
+
+```{r int}
+nfl_QBs %>%
+  ggplot(mapping = aes(x = game_week, y= int, color = name)) + geom_smooth()
+```
+By interceptions thrown
+
+```{r sck}
+nfl_QBs %>%
+  ggplot(mapping = aes(x = game_week, y= sck, color = name)) + geom_smooth()
+```
+By sacks taken
+
+```{r pass-rate}
+nfl_QBs %>%
+  ggplot(mapping = aes(x = game_week, y= rate, color = name)) + geom_smooth()
+```
+by passer rating
+
+
+
+
+Tom Brady ended up winning the MVP race, while Michael Vick was the second highest QB. There are other stats not taken into consideration in these graphs, such as wins by team, and in Vick's case, running stats. His passing stats were lower than the other 3, but was such a prolific runner that it helped his overall chances. 

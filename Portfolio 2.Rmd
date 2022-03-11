@@ -1,0 +1,81 @@
+---
+title: "Portfolio 02"
+author: "AwesomePie1453"
+date: "2/15/2022"
+output: html_document
+---
+
+In the last proftolio project, we looked at the four best quarterbacks (based on MVP votes) in the 2010 NFL season, and looked at their stats to determine who was the best quarterback. Now, we are going to look at their lead running back stats, to see if any of them were helped tremendously by the lead back.
+
+```{r load}
+library(tidyverse)
+library(readr)
+nfl_2010_2017 <- read_csv("nfl_2010-2017.csv")
+```
+
+```{r RBs}
+nfl_RBs <- nfl_2010_2017 %>%
+  filter(position == "RB") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Brandon Jackson", "BenJarvus Green-Ellis", "Mike Tolbert", "LeSean McCoy"))
+  
+```
+First, let's look at their basic weekly stat, rushing yards.
+
+```{r Rushyds}
+nfl_RBs %>%
+  ggplot(mapping = aes(x = game_week, y= rush_yds, color = name)) + geom_smooth() 
+```
+Now, some got more attempts than others. Who was trusted the ball the most?
+
+```{r Rushatt}
+nfl_RBs %>%
+  ggplot(mapping = aes(x = game_week, y= rush_att, color = name)) + geom_smooth() 
+```
+
+So then, who made the most of the attempts?
+
+```{r RushAVG}
+nfl_RBs %>%
+  ggplot(mapping = aes(x = game_week, y= rush_avg, color = name)) + geom_smooth() 
+```
+
+Who scored the most rushing touchdowns?
+
+
+```{r RushTDS}
+nfl_RBs %>%
+  ggplot(mapping = aes(x = game_week, y= rush_tds, color = name)) + geom_smooth() 
+```
+
+Who fumbled the most, which you do not want in a runningback
+
+```{r Rushfumbles}
+nfl_RBs %>%
+  ggplot(mapping = aes(x = game_week, y= rush_fumbles, color = name)) + geom_smooth(alpha=.5) 
+```
+
+Now, running backs don't just run. They can also catch! How often did each running back touch the ball (rushing attempts + receptions)?
+
+```{r touches}
+nfl_RBs %>%
+  mutate(touches = rush_att + rec) %>%
+  ggplot(mapping = aes(x = game_week, y= touches, color = name)) + geom_smooth() 
+```
+
+What about their total yards?
+
+```{r TOTALYARD}
+nfl_RBs %>%
+  mutate(total_yds = rush_yds + rec_yds) %>%
+  ggplot(mapping = aes(x = game_week, y= total_yds, color = name)) + geom_smooth() 
+```
+What about total touchdowns?
+
+```{r TOTALTDS}
+nfl_RBs %>%
+  mutate(total_tds = rush_tds + rec_tds) %>%
+  ggplot(mapping = aes(x = game_week, y= total_tds, color = name)) + geom_smooth() 
+```
+
+Green-Ellis was the RB for the Patriots (Brady), Jackson was the RB for Packers (Rodgers), McCoy was the RB for the Eagles (Vick), and Tolbert was the RB for the Chargers (Rivers). Which running back did the best? Could that help out the QB?

@@ -1,0 +1,80 @@
+---
+title: "Portfolio 3"
+author: "AwesomePie1453"
+date: "2/23/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, include=FALSE}
+library(tidyverse)
+library(readr)
+nfl_2010_2017 <- read_csv("nfl_2010-2017.csv")
+```
+
+Two weeks ago, we looked at the top quarterbacks in the 2010 NFL season and compared their stats. Last week, we added in runningbacks. This week we are going to compare the top two pass catchers of each of the QBs from that season. 
+
+
+```{r WRs}
+nfl_WRs <- nfl_2010_2017 %>%
+  filter(position == "WR/TE") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Greg Jennings", "James Jones", "Wes Welker", "Deion Branch", "Antonio Gates", "Malcom Floyd", "DeSean Jackson", "Jeremy Maclin"))
+nfl_WRs
+  
+```
+
+
+
+```{r recyds1}
+nfl_WRs %>%
+  ggplot(mapping = aes(x = game_week, y= rec_yds, color = name)) + geom_smooth() 
+```
+
+Since we are trying to combine two pass catchers per team, looking at both individually will not help our analysis. Instead, we are going to merge the two together to create just one variable for the receivers.
+
+```{r WR1}
+nfl_WR1 <- nfl_WRs %>%
+  filter(name %in% c("Greg Jennings", "Wes Welker", "Antonio Gates", "DeSean Jackson"))
+```
+```{r WR2}
+nfl_WR2 <- nfl_WRs %>%
+  filter(name %in% c("James Jones", "Deion Branch", "Malcom Floyd", "Jeremy Maclin"))
+```
+
+```{r combined}
+nfl_combined <- full_join(nfl_WR1, nfl_WR2, by = "team")
+nfl_combined
+```
+```{r mutate}
+nfl_combined <- nfl_combined %>%
+  mutate(nfl_combined, team_rec_yds = rec_yds.x + rec_yds.y)  %>%
+  mutate(nfl_combined, team_recs = rec.x + rec.y)  %>%
+  mutate(nfl_combined, team_rec_tds = rec_tds.x + rec_tds.y)
+nfl_combined
+```
+So lets look, how did each team do in rec yards with their top 2 WRs week to week?
+
+```{r recyds}
+nfl_combined %>%
+  ggplot(mapping = aes(x = game_week.x, y= team_rec_yds, color = team)) + geom_smooth() 
+```
+What about receptions?
+
+
+```{r recs}
+nfl_combined %>%
+  ggplot(mapping = aes(x = game_week.x, y= team_recs, color = team)) + geom_smooth() 
+```
+What about touchdowns?
+
+```{r rectds}
+nfl_combined %>%
+  ggplot(mapping = aes(x = game_week.x, y= team_rec_tds, color = team)) + geom_smooth() 
+```
+
+Those stats give a pretty good view. And receiving stats should be more reflective of a QBs season than running back stats should be. But here is the problem. You see in these graphs, that "NA" (the san diego chargers, who have no team name in this data set apparently) always stop around week 13. That is because Antonio Gates, the leading pass catcher of the San Diego Chargers, got hurt around that week. Thus the data stops. That is a problem. In fact, this shows a lot of problems, since injuries could impact these stats. And there are other WRs on the team than just the top 2. We looked a the top 2 across the season, not the top 2 across each individual week. So a third WR could have had an amazing week that week, but not show up on our graph. And, as Antonio Gates shows us, both WRs dont play every week sometimes due to injuries. How do we fix this? Come back next week!
+
