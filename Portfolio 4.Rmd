@@ -1,0 +1,120 @@
+---
+title: "Portfolio 4"
+author: "AwesomePie1453"
+date: "3/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, include=FALSE}
+library(tidyverse)
+library(readr)
+library(gridExtra)
+nfl_2010_2017 <- read_csv("nfl_2010-2017.csv")
+```
+### Welcome Back!
+
+The last three portfolios, we have looked at the top four MVP Quarterbacks of the 2010 season, as well as their running backs and top receivers. Today, we will present the previous graphs in ways that will more aptly compare the teams.
+
+### Quarterbacks
+
+Here we have Aaron Rodgers, Tom Brady, Phillip Rivers and Michael Vick. The stats we used (slightly different than portfolio 1) are their weekly passing yards, their weekly passing touchdowns, their weekly intereceptions, and their weekly passer rating. This should give us a good idea of the passing stats of each QB each week.
+```{r QBs, include=FALSE}
+nfl_QBs <- nfl_2010_2017 %>%
+  filter(position == "QB") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Aaron Rodgers", "Tom Brady", "Philip Rivers", "Michael Vick"))
+```
+
+```{r QBs Graphs, include=FALSE}
+attach(nfl_QBs)
+Passing_yards  <- ggplot(mapping = aes(x = game_week, y= pass_yds, color = name)) + geom_smooth() + labs(title= "2010 QBs by Weekly Passing Yards")
+Passing_tds <-  ggplot(mapping = aes(x = game_week, y= pass_tds, color = name)) + geom_smooth() + labs(title= "2010 QBs by Weekly Passing TDs")
+interceptions <-  ggplot(mapping = aes(x = game_week, y= int, color = name)) + geom_smooth() + labs(title= "2010 QBs by Weekly Interceptions")
+passer_rating <-  ggplot(mapping = aes(x = game_week, y= rate, color = name)) + geom_smooth()+ labs(title= "2010 QBs by Weekly Passer Rating")
+```
+
+```{r QBG}
+attach(nfl_QBs)
+grid.arrange(Passing_yards,Passing_tds,interceptions,passer_rating, ncol = 2)
+```
+
+### Running Backs
+Next, lets look at their Running Backs. We chose to look at their weekly rushing yards, yards per rush, fumbles, touches, total yards, and total touchdowns. A Running Back is a large part of an offense, so they require more stats for us to look at for comparison.
+
+```{r RBs, include=FALSE}
+nfl_RBs <- nfl_2010_2017 %>%
+  filter(position == "RB") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Brandon Jackson", "BenJarvus Green-Ellis", "Mike Tolbert", "LeSean McCoy")) %>%
+  mutate(touches = rush_att + rec) %>%
+  mutate(total_yds = rush_yds + rec_yds) %>%
+  mutate(total_tds = rush_tds + rec_tds)
+
+```
+
+```{r RBs Graphs, include=FALSE}
+attach(nfl_RBs)
+Rushing_yards  <- ggplot(mapping = aes(x = game_week, y= rush_yds, color = name)) + geom_smooth() + labs(title= "2010 RBs by Weekly Rushing Yards")
+Rushing_average <-  ggplot(mapping = aes(x = game_week, y= rush_avg, color = name)) + geom_smooth()+ labs(title= "2010 RBs by Weekly Yards Per Rush")
+Rushing_fumbles <- ggplot(mapping = aes(x = game_week, y= rush_fumbles, color = name)) + geom_smooth(alpha=.5)+ labs(title= "2010 RBs by Weekly Rushing Fumbles")
+Rushing_touches <- ggplot(mapping = aes(x = game_week, y= touches, color = name)) + geom_smooth() + labs(title= "2010 RBs by Weekly Touches")
+Total_yards <- ggplot(mapping = aes(x = game_week, y= total_yds, color = name)) + geom_smooth() + labs(title= "2010 RBs by Weekly Total Yards")
+Total_Tds <- ggplot(mapping = aes(x = game_week, y= total_tds, color = name)) + geom_smooth() + labs(title= "2010 RBs by Weekly Total TDs")
+
+```
+
+```{r RBG}
+attach(nfl_RBs)
+grid.arrange(Rushing_yards, Rushing_average, Rushing_fumbles, Rushing_touches, Total_yards, Total_Tds, ncol = 2)
+```
+
+
+### Receivers
+Lastly, here are the top two receivers (WR/TE) per team. For this we chose receiving yards, receptions, receiving touchdowns, and this time we also added rushing yards to look at another part of the receiver's dynamic ability. 
+
+```{r WRs, include=FALSE}
+nfl_WRs <- nfl_2010_2017 %>%
+  filter(position == "WR/TE") %>%
+  filter(game_year == 2010) %>%
+  filter(name %in% c("Greg Jennings", "James Jones", "Wes Welker", "Deion Branch", "Antonio Gates", "Malcom Floyd", "DeSean Jackson", "Jeremy Maclin"))
+```
+```{r WR1, include=FALSE}
+nfl_WR1 <- nfl_WRs %>%
+  filter(name %in% c("Greg Jennings", "Wes Welker", "Antonio Gates", "DeSean Jackson"))
+```
+```{r WR2, include=FALSE}
+nfl_WR2 <- nfl_WRs %>%
+  filter(name %in% c("James Jones", "Deion Branch", "Malcom Floyd", "Jeremy Maclin"))
+```
+```{r WRcombined, include=FALSE}
+nfl_WR_combined <- full_join(nfl_WR1, nfl_WR2, by = "team")
+```
+```{r mutate, include=FALSE}
+nfl_WR_combined <- nfl_WR_combined %>%
+  mutate(nfl_WR_combined, team_rec_yds = rec_yds.x + rec_yds.y)  %>%
+  mutate(nfl_WR_combined, team_recs = rec.x + rec.y)  %>%
+  mutate(nfl_WR_combined, team_rec_tds = rec_tds.x + rec_tds.y) %>%
+  mutate(nfl_WR_combined, team_rush_yds = rush_yds.x + rush_yds.y)
+```
+
+```{r WRs Graphs, include=FALSE}
+attach(nfl_WR_combined)
+Receiving_yards  <- ggplot(mapping = aes(x = game_week.x, y= team_rec_yds, color = team)) + geom_smooth()+ labs(title= "2010 WR/TEs by Weekly Receiving Yards")
+Receptions <-  ggplot(mapping = aes(x = game_week.x, y= team_recs, color = team)) + geom_smooth() + labs(title= "2010 WR/TEs by Weekly Receptions")
+Receiving_TDs<-  ggplot(mapping = aes(x = game_week.x, y= team_rec_tds, color = team)) + geom_smooth() + labs(title= "2010 WR/TEs by Weekly Receiving Touchdowns")
+Rushing_yards_WR <- ggplot(mapping = aes(x=game_week.x, y=team_rush_yds, color = team)) + geom_smooth() + labs(title= "2010 WR/TEs by Weekly Rushing Yards")
+```
+
+```{r WRG}
+attach(nfl_WR_combined)
+grid.arrange(Receiving_TDs, Receptions, Receiving_yards, Rushing_yards_WR, ncol = 2)
+```
+
+
+### Conclusion
+
+This 4th portfolio is a way to compare all of the stats together, instead of scrolling through multiple graphs. Some obselete stats were taken out from our graphs, and now we have a cleaner, udpated version of what we have been working on. Now, there still are some issues. Anf hopefully in the future we will be able to fix them! See you next time :)
